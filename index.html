@@ -240,6 +240,10 @@
     margin-top: 40px; font-size: 11px; color: var(--text-muted);
     border-top: 1px solid var(--border); padding-top: 16px; line-height: 1.8;
   }
+
+  .hidden {
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -299,7 +303,7 @@
   </div>
  
   <!-- 結果 -->
-  <div id="result-section">
+  <div id="result-section" class="hidden">
  
     <div class="card">
       <div class="card-title">▸ 算出結果</div>
@@ -463,7 +467,7 @@ function calculate() {
 }
  
 function renderResults(pm) {
-  document.getElementById('result-section').style.display = 'block';
+  document.getElementById('result-section').classList.remove('hidden');
  
   document.getElementById('r-pm').textContent       = Math.round(pm*10)/10;
   document.getElementById('r-ipa').textContent      = ipaRounded;
