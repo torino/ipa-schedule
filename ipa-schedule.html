@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPA 標準工期計算</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e3050;
+    --accent: #00c8ff;
+    --accent2: #0066ff;
+    --accent3: #7c3aed;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --success: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+
+    --phase1: #3b82f6;
+    --phase2: #8b5cf6;
+    --phase3: #ec4899;
+    --phase4: #f59e0b;
+    --phase5: #10b981;
+    --phase6: #06b6d4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'BIZ UDGothic', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── グリッド背景 ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── ヘッダー ── */
+  header {
+    margin-bottom: 40px;
+  }
+  .header-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  h1 span { color: var(--accent); }
+  .header-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .formula-chip {
+    display: inline-block;
+    margin-top: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-family: 'Rajdhani', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  /* ── カード ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  /* ── モード切替 ── */
+  .mode-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .mode-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .mode-tab.active {
+    background: var(--accent2);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* ── 入力 ── */
+  .input-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+  .input-group {
+    flex: 1;
+    min-width: 160px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  input[type="number"], input[type="text"], select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus {
+    border-color: var(--accent);
+  }
+  select option { background: var(--surface2); }
+
+  .btn-calc {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    padding: 10px 28px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-calc:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-calc:active { transform: translateY(0); }
+
+  /* ── 結果サマリ ── */
+  #result-section { display: none; }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .result-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+  }
+  .result-item .val {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .result-item .unit {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .result-item .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  /* ── 開始月・工期調整 ── */
+  .adjust-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 24px;
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .adjust-row label { margin-bottom: 0; }
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 200px;
+  }
+  .slider-wrap span {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 40px;
+    text-align: right;
+  }
+  input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    height: 4px;
+    cursor: pointer;
+  }
+
+  /* ── ガントチャート ── */
+  .gantt-wrap {
+    overflow-x: auto;
+  }
+  .gantt-header {
+    display: flex;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  .gantt-label-col { width: 120px; flex-shrink: 0; }
+  .gantt-months { display: flex; flex: 1; }
+  .gantt-month {
+    flex: 1;
+    text-align: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-left: 1px solid var(--border);
+    padding: 2px 0;
+    min-width: 32px;
+  }
+  .gantt-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .gantt-phase-label {
+    width: 120px;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-right: 8px;
+  }
+  .gantt-track {
+    flex: 1;
+    height: 28px;
+    background: var(--surface2);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .gantt-bar {
+    position: absolute;
+    top: 3px;
+    height: 22px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    transition: left 0.4s ease, width 0.4s ease;
+  }
+  .gantt-now-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(239,68,68,0.7);
+    z-index: 10;
+  }
+
+  /* ── フェーズ調整 ── */
+  .phase-adjust {
+    margin-top: 24px;
+  }
+  .phase-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .phase-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .phase-name {
+    width: 120px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .phase-slider { flex: 1; accent-color: var(--accent); }
+  .phase-pct {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    width: 42px;
+    text-align: right;
+  }
+  .phase-months {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 50px;
+    text-align: right;
+  }
+  .pct-warning {
+    font-size: 12px;
+    color: var(--warn);
+    margin-top: 6px;
+    display: none;
+  }
+
+  /* ── フッター ── */
+  .footer-note {
+    margin-top: 40px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .gantt-phase-label { width: 80px; font-size: 11px; }
+    .gantt-label-col { width: 80px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-label">IPA準拠 / システム開発</div>
+    <h1>標準工期<span>計算</span></h1>
+    <div class="header-sub">独立行政法人情報処理推進機構（IPA）が定める標準工期算出式に基づく計算ツール</div>
+    <div class="formula-chip">T = 0.41 × PM^(1/3)</div>
+  </header>
+
+  <!-- 入力カード -->
+  <div class="card">
+    <div class="card-title">▸ 入力モード</div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="setMode('pm')">人月で入力</button>
+      <button class="mode-tab" onclick="setMode('budget')">予算・単価から算出</button>
+    </div>
+
+    <!-- 人月モード -->
+    <div id="mode-pm">
+      <div class="input-row">
+        <div class="input-group">
+          <label>総工数（人月）</label>
+          <input type="number" id="inp-pm" min="1" max="9999" placeholder="例：50" oninput="onInputChange()">
+        </div>
+        <div class="input-group" style="max-width:180px">
+          <label>開始年月</label>
+          <input type="month" id="inp-start-pm" oninput="onInputChange()">
+        </div>
+      </div>
+    </div>
+
+    <!-- 予算モードl -->
+    <div id="mode-budget" style="display:none">
+      <div class="input-row">
+        <div class="input-group">
+          <label>予算（万円）</label>
+          <input type="number" id="inp-budget" min="1" placeholder="例：5000" oninput="onBudgetChange()">
+        </div>
+        <div class="input-group">
+          <label>単価（万円 / 人月）</label>
+          <input type="number" id="inp-unit" min="1" placeholder="例：100" oninput="onBudgetChange()">
+        </div>
+        <div class="input-group" style="max-width:180px">
+          <label>開始年月</label>
+          <input type="month" id="inp-start-budget" oninput="onInputChange()">
+        </div>
+      </div>
+      <div id="budget-pm-result" style="margin-top:12px;font-size:13px;color:var(--text-muted)"></div>
+    </div>
+  </div>
+
+  <!-- 結果 -->
+  <div id="result-section">
+
+    <!-- サマリ -->
+    <div class="card">
+      <div class="card-title">▸ 算出結果</div>
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="lbl">総工数</div>
+          <div class="val" id="r-pm">-</div>
+          <div class="unit">人月</div>
+        </div>
+        <div class="result-item">
+          <div class="lbl">標準工期</div>
+          <div class="val" id="r-duration">-</div>
+          <div class="unit">ヶ月</div>
+        </div>
+        <div class="result-item">
+          <div class="lbl">完了予定</div>
+          <div class="val" id="r-end" style="font-size:22px">-</div>
+          <div class="unit">終了月</div>
+        </div>
+        <div class="result-item">
+          <div class="lbl">平均体制</div>
+          <div class="val" id="r-team">-</div>
+          <div class="unit">名</div>
+        </div>
+      </div>
+
+      <!-- 工期微調整 -->
+      <div class="adjust-row">
+        <label style="font-size:12px;color:var(--text-muted);letter-spacing:1px;">工期を調整</label>
+        <div class="slider-wrap">
+          <input type="range" id="dur-slider" min="1" max="60" value="12" oninput="onDurSlider()">
+          <span id="dur-slider-val">12</span>
+          <span style="font-size:13px;color:var(--text-muted)">ヶ月</span>
+        </div>
+        <button class="btn-calc" style="padding:8px 16px;font-size:12px;" onclick="resetDuration()">IPA値に戻す</button>
+      </div>
+    </div>
+
+    <!-- ガントチャート -->
+    <div class="card">
+      <div class="card-title">▸ スケジュール</div>
+      <div class="gantt-wrap">
+        <div class="gantt-header">
+          <div class="gantt-label-col"></div>
+          <div class="gantt-months" id="gantt-month-labels"></div>
+        </div>
+        <div id="gantt-rows"></div>
+      </div>
+    </div>
+
+    <!-- フェーズ比率調整 -->
+    <div class="card">
+      <div class="card-title">▸ フェーズ構成を調整</div>
+      <div id="phase-sliders"></div>
+      <div class="pct-warning" id="pct-warning">⚠ 合計が100%になるよう調整してください（現在 <span id="pct-total">0</span>%）</div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    算出式：標準工期（月）＝ 0.41 × 総工数^(1/3)　／　出典：IPA「ソフトウェア開発データ白書」<br>
+    ※ 本ツールの結果はあくまで目安です。プロジェクトの特性・リスク・組織能力に応じて適宜見直してください。
+  </div>
+</div>
+
+<script>
+// ── フェーズ定義 ──
+const PHASES = [
+  { name: '要件定義',   pct: 10, color: 'var(--phase1)' },
+  { name: '基本設計',   pct: 15, color: 'var(--phase2)' },
+  { name: '詳細設計',   pct: 20, color: 'var(--phase3)' },
+  { name: '製造・実装', pct: 25, color: 'var(--phase4)' },
+  { name: 'テスト',     pct: 20, color: 'var(--phase5)' },
+  { name: '移行・導入', pct: 10, color: 'var(--phase6)' },
+];
+
+let currentMode = 'pm';
+let ipaMonths = 0;
+let adjustedMonths = 0;
+let startYM = null; // { year, month } 1-indexed
+
+function setMode(m) {
+  currentMode = m;
+  document.querySelectorAll('.mode-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&m==='pm')||(i===1&&m==='budget')));
+  document.getElementById('mode-pm').style.display = m === 'pm' ? '' : 'none';
+  document.getElementById('mode-budget').style.display = m === 'budget' ? '' : 'none';
+  recalc();
+}
+
+// 当月をデフォルト
+window.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('inp-start-pm').value = ym;
+  document.getElementById('inp-start-budget').value = ym;
+  buildPhaseSliders();
+});
+
+function onBudgetChange() {
+  const budget = parseFloat(document.getElementById('inp-budget').value);
+  const unit   = parseFloat(document.getElementById('inp-unit').value);
+  const el = document.getElementById('budget-pm-result');
+  if (budget > 0 && unit > 0) {
+    const pm = Math.round(budget / unit * 10) / 10;
+    el.textContent = `→ 総工数：${pm} 人月`;
+  } else {
+    el.textContent = '';
+  }
+  onInputChange();
+}
+
+function onInputChange() { recalc(); }
+
+function getPM() {
+  if (currentMode === 'pm') {
+    return parseFloat(document.getElementById('inp-pm').value) || 0;
+  } else {
+    const b = parseFloat(document.getElementById('inp-budget').value) || 0;
+    const u = parseFloat(document.getElementById('inp-unit').value) || 0;
+    return u > 0 ? b / u : 0;
+  }
+}
+
+function getStartYM() {
+  const id = currentMode === 'pm' ? 'inp-start-pm' : 'inp-start-budget';
+  const val = document.getElementById(id).value;
+  if (!val) return null;
+  const [y, m] = val.split('-').map(Number);
+  return { year: y, month: m };
+}
+
+function calcIPA(pm) {
+  return 0.41 * Math.pow(pm, 1/3);
+}
+
+function recalc() {
+  const pm = getPM();
+  if (pm <= 0) { document.getElementById('result-section').style.display = 'none'; return; }
+
+  ipaMonths = calcIPA(pm);
+  adjustedMonths = parseFloat(document.getElementById('dur-slider').value) || Math.round(ipaMonths);
+
+  // 初回：スライダーをIPA値に合わせる
+  const slider = document.getElementById('dur-slider');
+  const roundedIPA = Math.max(1, Math.round(ipaMonths));
+  if (Math.abs(adjustedMonths - roundedIPA) > 30) {
+    adjustedMonths = roundedIPA;
+  }
+  slider.value = adjustedMonths;
+  document.getElementById('dur-slider-val').textContent = adjustedMonths;
+
+  startYM = getStartYM();
+  renderResults(pm, adjustedMonths);
+}
+
+function onDurSlider() {
+  adjustedMonths = parseInt(document.getElementById('dur-slider').value);
+  document.getElementById('dur-slider-val').textContent = adjustedMonths;
+  const pm = getPM();
+  startYM = getStartYM();
+  renderResults(pm, adjustedMonths);
+}
+
+function resetDuration() {
+  const pm = getPM();
+  if (!pm) return;
+  const rounded = Math.max(1, Math.round(calcIPA(pm)));
+  document.getElementById('dur-slider').value = rounded;
+  adjustedMonths = rounded;
+  document.getElementById('dur-slider-val').textContent = rounded;
+  startYM = getStartYM();
+  renderResults(pm, rounded);
+}
+
+function renderResults(pm, months) {
+  document.getElementById('result-section').style.display = '';
+
+  // サマリ
+  document.getElementById('r-pm').textContent = Math.round(pm * 10) / 10;
+  document.getElementById('r-duration').textContent = months;
+  document.getElementById('r-team').textContent = pm > 0 && months > 0 ? (Math.round(pm / months * 10) / 10) : '-';
+
+  let endLabel = '-';
+  if (startYM) {
+    const end = addMonths(startYM, months - 1);
+    endLabel = `${end.year}/${String(end.month).padStart(2,'0')}`;
+  }
+  document.getElementById('r-end').textContent = endLabel;
+
+  renderGantt(months);
+}
+
+function addMonths(ym, n) {
+  let m = ym.month - 1 + n;
+  return { year: ym.year + Math.floor(m / 12), month: (m % 12) + 1 };
+}
+
+function getPhaseRatios() {
+  const sliders = document.querySelectorAll('.phase-slider-input');
+  return Array.from(sliders).map(s => parseFloat(s.value));
+}
+
+function renderGantt(months) {
+  if (!startYM) return;
+
+  const ratios = getPhaseRatios();
+  const total = ratios.reduce((a,b)=>a+b,0);
+
+  // 月ラベル
+  const labelsEl = document.getElementById('gantt-month-labels');
+  labelsEl.innerHTML = '';
+  for (let i = 0; i < months; i++) {
+    const ym = addMonths(startYM, i);
+    const d = document.createElement('div');
+    d.className = 'gantt-month';
+    d.textContent = `${ym.year%100}/${String(ym.month).padStart(2,'0')}`;
+    labelsEl.appendChild(d);
+  }
+
+  // 今月の位置
+  const now = new Date();
+  const nowYM = { year: now.getFullYear(), month: now.getMonth()+1 };
+  const nowOffset = monthDiff(startYM, nowYM); // 0-indexed
+
+  // 行
+  const rowsEl = document.getElementById('gantt-rows');
+  rowsEl.innerHTML = '';
+
+  let cursor = 0;
+  PHASES.forEach((ph, i) => {
+    const pct = ratios[i] / total;
+    const barMonths = Math.max(0.5, months * pct);
+    const startPct = cursor / months * 100;
+    const widthPct = barMonths / months * 100;
+
+    const row = document.createElement('div');
+    row.className = 'gantt-row';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'gantt-phase-label';
+    lbl.textContent = ph.name;
+
+    const track = document.createElement('div');
+    track.className = 'gantt-track';
+
+    // 今月ライン
+    if (nowOffset >= 0 && nowOffset < months) {
+      const line = document.createElement('div');
+      line.className = 'gantt-now-line';
+      line.style.left = `${(nowOffset / months) * 100}%`;
+      line.title = '今月';
+      track.appendChild(line);
+    }
+
+    const bar = document.createElement('div');
+    bar.className = 'gantt-bar';
+    bar.style.left = `${startPct}%`;
+    bar.style.width = `${widthPct}%`;
+    bar.style.background = ph.color;
+    bar.style.opacity = '0.9';
+
+    // ラベル（幅が十分なら）
+    if (widthPct > 8) bar.textContent = ph.name;
+
+    // スタート月
+    const startM = addMonths(startYM, Math.round(cursor));
+    bar.title = `${ph.name}：${startM.year}/${String(startM.month).padStart(2,'0')} 開始（約${Math.round(barMonths*10)/10}ヶ月）`;
+
+    track.appendChild(bar);
+    row.appendChild(lbl);
+    row.appendChild(track);
+    rowsEl.appendChild(row);
+
+    cursor += barMonths;
+  });
+}
+
+function monthDiff(a, b) {
+  return (b.year - a.year) * 12 + (b.month - a.month);
+}
+
+// ── フェーズスライダー構築 ──
+function buildPhaseSliders() {
+  const wrap = document.getElementById('phase-sliders');
+  wrap.innerHTML = '';
+  PHASES.forEach((ph, i) => {
+    const row = document.createElement('div');
+    row.className = 'phase-row';
+    row.innerHTML = `
+      <div class="phase-dot" style="background:${ph.color}"></div>
+      <div class="phase-name">${ph.name}</div>
+      <input class="phase-slider phase-slider-input" type="range" min="2" max="60" value="${ph.pct}" data-idx="${i}" oninput="onPhaseSlider(${i})">
+      <span class="phase-pct" id="pph-${i}">${ph.pct}%</span>
+      <span class="phase-months" id="pmo-${i}"></span>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function onPhaseSlider(idx) {
+  const sliders = document.querySelectorAll('.phase-slider-input');
+  const vals = Array.from(sliders).map(s => parseFloat(s.value));
+  const total = vals.reduce((a,b)=>a+b,0);
+
+  sliders.forEach((s,i) => {
+    document.getElementById(`pph-${i}`).textContent = Math.round(vals[i]/total*100) + '%';
+  });
+
+  const warn = document.getElementById('pct-warning');
+  warn.style.display = 'none';
+
+  // 月数表示更新
+  updatePhaseMonths();
+
+  if (adjustedMonths > 0 && startYM) renderGantt(adjustedMonths);
+}
+
+function updatePhaseMonths() {
+  const ratios = getPhaseRatios();
+  const total = ratios.reduce((a,b)=>a+b,0);
+  ratios.forEach((r, i) => {
+    const mo = document.getElementById(`pmo-${i}`);
+    if (mo && adjustedMonths > 0) {
+      mo.textContent = Math.round(adjustedMonths * r / total * 10) / 10 + 'ヶ月';
+    }
+  });
+}
+</script>
+</body>
+</html>
