@@ -6,7 +6,7 @@
 <title>IPA 標準工期計算</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
-
+ 
   :root {
     --bg: #0a0e1a;
     --surface: #111827;
@@ -23,16 +23,16 @@
     --phase5: #10b981;
     --phase6: #06b6d4;
   }
-
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'BIZ UDGothic', sans-serif;
     min-height: 100vh;
   }
-
+ 
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -42,13 +42,13 @@
     background-size: 40px 40px;
     pointer-events: none; z-index: 0;
   }
-
+ 
   .container {
     position: relative; z-index: 1;
     max-width: 960px; margin: 0 auto;
     padding: 40px 20px 80px;
   }
-
+ 
   header { margin-bottom: 36px; }
   .header-label {
     font-family: 'Rajdhani', sans-serif;
@@ -69,7 +69,7 @@
     font-family: 'Rajdhani', monospace; font-size: 14px;
     color: var(--accent); letter-spacing: 1px;
   }
-
+ 
   .card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 8px; padding: 28px; margin-bottom: 20px;
@@ -79,7 +79,7 @@
     letter-spacing: 3px; text-transform: uppercase;
     color: var(--accent); margin-bottom: 20px;
   }
-
+ 
   /* モード切替 */
   .mode-tabs {
     display: flex; gap: 4px;
@@ -94,7 +94,7 @@
     transition: all 0.2s;
   }
   .mode-tab.active { background: var(--accent2); color: #fff; font-weight: 700; }
-
+ 
   /* 入力 */
   .input-row {
     display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;
@@ -114,7 +114,7 @@
     outline: none; transition: border-color 0.2s;
   }
   input:focus { border-color: var(--accent); }
-
+ 
   /* 算出ボタン */
   .btn-primary {
     display: block; width: 100%;
@@ -127,7 +127,7 @@
   }
   .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
   .btn-primary:active { transform: translateY(0); }
-
+ 
   .btn-small {
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: 4px; color: var(--text-muted);
@@ -135,20 +135,20 @@
     font-size: 12px; cursor: pointer; transition: border-color 0.2s;
   }
   .btn-small:hover { border-color: var(--accent); color: var(--accent); }
-
+ 
   .budget-derived {
     font-size: 13px; color: var(--accent);
     margin-top: -12px; margin-bottom: 12px; min-height: 18px;
   }
-
+ 
   .error-msg {
     color: #ef4444; font-size: 13px;
     margin-top: 8px; display: none;
   }
-
+ 
   /* 結果 */
   #result-section { display: none; }
-
+ 
   .result-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -165,7 +165,7 @@
   }
   .result-item .val.sm { font-size: 22px; }
   .result-item .unit { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-
+ 
   /* 工期スライダー */
   .dur-section {
     background: var(--surface2); border-radius: 6px;
@@ -179,7 +179,7 @@
     font-weight: 700; color: var(--accent); min-width: 36px; text-align: right;
   }
   .dur-unit { font-size: 13px; color: var(--text-muted); }
-
+ 
   /* ガント */
   .gantt-wrap { overflow-x: auto; }
   .gantt-header { display: flex; margin-bottom: 4px; }
@@ -221,7 +221,7 @@
     font-size: 9px; padding: 1px 3px; border-radius: 2px;
     font-family: 'Rajdhani', sans-serif; z-index: 6;
   }
-
+ 
   /* フェーズ調整 */
   .phase-row {
     display: flex; align-items: center;
@@ -235,7 +235,7 @@
     font-weight: 700; color: var(--accent); width: 40px; text-align: right;
   }
   .phase-mo { font-size: 12px; color: var(--text-muted); width: 52px; text-align: right; }
-
+ 
   .footer-note {
     margin-top: 40px; font-size: 11px; color: var(--text-muted);
     border-top: 1px solid var(--border); padding-top: 16px; line-height: 1.8;
@@ -244,23 +244,23 @@
 </head>
 <body>
 <div class="container">
-
+ 
   <header>
     <div class="header-label">IPA準拠 / システム開発</div>
     <h1>標準工期<span>計算</span></h1>
     <div class="header-sub">独立行政法人情報処理推進機構（IPA）が定める標準工期算出式に基づく計算ツール</div>
     <div class="formula-chip">T = 0.41 × PM^(1/3)</div>
   </header>
-
+ 
   <!-- 入力カード -->
   <div class="card">
     <div class="card-title">▸ 入力</div>
-
+ 
     <div class="mode-tabs">
       <button class="mode-tab active" onclick="setMode('pm')">人月で入力</button>
       <button class="mode-tab" onclick="setMode('budget')">予算・単価から算出</button>
     </div>
-
+ 
     <!-- 人月モード -->
     <div id="mode-pm">
       <div class="input-row">
@@ -274,7 +274,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- 予算モード -->
     <div id="mode-budget" style="display:none">
       <div class="input-row">
@@ -293,17 +293,17 @@
       </div>
       <div class="budget-derived" id="budget-derived"></div>
     </div>
-
+ 
     <div class="error-msg" id="err-msg">入力値を確認してください</div>
     <button class="btn-primary" onclick="calculate()">算　出</button>
   </div>
-
+ 
   <!-- 結果 -->
   <div id="result-section">
-
+ 
     <div class="card">
       <div class="card-title">▸ 算出結果</div>
-
+ 
       <div class="result-grid">
         <div class="result-item">
           <div class="lbl">総工数</div>
@@ -331,7 +331,7 @@
           <div class="unit">名</div>
         </div>
       </div>
-
+ 
       <div class="dur-section">
         <div class="dur-label">▸ 工期を調整（スライダー）</div>
         <div class="dur-row">
@@ -343,7 +343,7 @@
         </div>
       </div>
     </div>
-
+ 
     <!-- ガントチャート -->
     <div class="card">
       <div class="card-title">▸ スケジュール</div>
@@ -355,21 +355,21 @@
         <div id="g-rows"></div>
       </div>
     </div>
-
+ 
     <!-- フェーズ比率 -->
     <div class="card">
       <div class="card-title">▸ フェーズ構成を調整</div>
       <div id="phase-sliders"></div>
     </div>
-
+ 
   </div>
-
+ 
   <div class="footer-note">
     算出式：標準工期（月）＝ 0.41 × 総工数^(1/3)　／　出典：IPA「ソフトウェア開発データ白書」<br>
     ※ 本ツールの結果はあくまで目安です。プロジェクトの特性・リスク・組織能力に応じて適宜見直してください。
   </div>
 </div>
-
+ 
 <script>
 const PHASES = [
   { name: '要件定義',   pct: 10, color: 'var(--phase1)' },
@@ -379,12 +379,12 @@ const PHASES = [
   { name: 'テスト',     pct: 20, color: 'var(--phase5)' },
   { name: '移行・導入', pct: 10, color: 'var(--phase6)' },
 ];
-
+ 
 let mode = 'pm';
 let ipaRounded = 0;
 let currentMonths = 0;
 let startYM = null;
-
+ 
 // 初期化
 window.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
@@ -393,7 +393,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('inp-start-budget').value = ym;
   buildPhaseSliders();
 });
-
+ 
 function setMode(m) {
   mode = m;
   document.querySelectorAll('.mode-tab').forEach((t,i) =>
@@ -401,14 +401,14 @@ function setMode(m) {
   document.getElementById('mode-pm').style.display     = m==='pm'     ? '' : 'none';
   document.getElementById('mode-budget').style.display = m==='budget' ? '' : 'none';
 }
-
+ 
 function showDerived() {
   const b = parseFloat(document.getElementById('inp-budget').value);
   const u = parseFloat(document.getElementById('inp-unit').value);
   const el = document.getElementById('budget-derived');
   el.textContent = (b>0 && u>0) ? `→ 総工数：${Math.round(b/u*10)/10} 人月` : '';
 }
-
+ 
 function getPM() {
   if (mode === 'pm') {
     return parseFloat(document.getElementById('inp-pm').value) || 0;
@@ -418,7 +418,7 @@ function getPM() {
     return u > 0 ? b/u : 0;
   }
 }
-
+ 
 function getStartYM() {
   const id = mode==='pm' ? 'inp-start-pm' : 'inp-start-budget';
   const v = document.getElementById(id).value;
@@ -426,21 +426,21 @@ function getStartYM() {
   const [y,m] = v.split('-').map(Number);
   return {year:y, month:m};
 }
-
+ 
 function addMonths(ym, n) {
   const m = ym.month - 1 + n;
   return { year: ym.year + Math.floor(m/12), month: (m%12)+1 };
 }
-
+ 
 function monthDiff(a, b) {
   return (b.year - a.year)*12 + (b.month - a.month);
 }
-
+ 
 // ── 算出ボタン ──
 function calculate() {
   const pm = getPM();
   const errEl = document.getElementById('err-msg');
-
+ 
   if (pm <= 0) {
     errEl.style.display = 'block';
     errEl.textContent = mode==='pm'
@@ -449,27 +449,27 @@ function calculate() {
     return;
   }
   errEl.style.display = 'none';
-
+ 
   const ipaExact = 0.41 * Math.pow(pm, 1/3);
   ipaRounded = Math.max(1, Math.round(ipaExact));
   currentMonths = ipaRounded;
   startYM = getStartYM();
-
+ 
   // スライダー初期化
   document.getElementById('dur-slider').value = ipaRounded;
   document.getElementById('dur-val').textContent = ipaRounded;
-
+ 
   renderResults(pm);
 }
-
+ 
 function renderResults(pm) {
   document.getElementById('result-section').style.display = '';
-
+ 
   document.getElementById('r-pm').textContent       = Math.round(pm*10)/10;
   document.getElementById('r-ipa').textContent      = ipaRounded;
   document.getElementById('r-duration').textContent = currentMonths;
   document.getElementById('r-team').textContent     = Math.round(pm/currentMonths*10)/10;
-
+ 
   if (startYM) {
     const end = addMonths(startYM, currentMonths - 1);
     document.getElementById('r-end').textContent =
@@ -477,16 +477,16 @@ function renderResults(pm) {
   } else {
     document.getElementById('r-end').textContent = '—';
   }
-
+ 
   updatePhaseMonths();
   renderGantt();
 }
-
+ 
 function onDurSlider() {
   currentMonths = parseInt(document.getElementById('dur-slider').value);
   document.getElementById('dur-val').textContent = currentMonths;
   document.getElementById('r-duration').textContent = currentMonths;
-
+ 
   const pm = getPM();
   if (pm > 0 && currentMonths > 0) {
     document.getElementById('r-team').textContent = Math.round(pm/currentMonths*10)/10;
@@ -499,7 +499,7 @@ function onDurSlider() {
   updatePhaseMonths();
   renderGantt();
 }
-
+ 
 function resetDuration() {
   if (!ipaRounded) return;
   currentMonths = ipaRounded;
@@ -518,14 +518,14 @@ function resetDuration() {
   updatePhaseMonths();
   renderGantt();
 }
-
+ 
 // ── ガント ──
 function renderGantt() {
   if (!startYM || currentMonths <= 0) return;
-
+ 
   const ratios = getPhaseRatios();
   const total  = ratios.reduce((a,b)=>a+b, 0);
-
+ 
   // 月ラベル
   const labelsEl = document.getElementById('g-month-labels');
   labelsEl.innerHTML = '';
@@ -536,33 +536,33 @@ function renderGantt() {
     d.textContent = (ym.year%100) + '/' + String(ym.month).padStart(2,'0');
     labelsEl.appendChild(d);
   }
-
+ 
   // 今月
   const now = new Date();
   const nowYM = { year: now.getFullYear(), month: now.getMonth()+1 };
   const nowOff = monthDiff(startYM, nowYM);
-
+ 
   // 行
   const rowsEl = document.getElementById('g-rows');
   rowsEl.innerHTML = '';
-
+ 
   let cursor = 0;
   PHASES.forEach((ph, i) => {
     const frac = ratios[i] / total;
     const barMo = Math.max(0.3, currentMonths * frac);
     const leftPct  = cursor / currentMonths * 100;
     const widthPct = barMo  / currentMonths * 100;
-
+ 
     const row = document.createElement('div');
     row.className = 'gantt-row';
-
+ 
     const lbl = document.createElement('div');
     lbl.className = 'g-phase-label';
     lbl.textContent = ph.name;
-
+ 
     const track = document.createElement('div');
     track.className = 'g-track';
-
+ 
     // 今月ライン
     if (nowOff >= 0 && nowOff < currentMonths) {
       const line = document.createElement('div');
@@ -577,28 +577,28 @@ function renderGantt() {
         track.appendChild(badge);
       }
     }
-
+ 
     const bar = document.createElement('div');
     bar.className = 'g-bar';
     bar.style.left      = leftPct + '%';
     bar.style.width     = widthPct + '%';
     bar.style.background = ph.color;
-
+ 
     const startM = addMonths(startYM, Math.round(cursor));
     bar.title = ph.name + '：' + startM.year + '/' +
                 String(startM.month).padStart(2,'0') +
                 ' 開始（約' + Math.round(barMo*10)/10 + 'ヶ月）';
     if (widthPct > 7) bar.textContent = ph.name;
-
+ 
     track.appendChild(bar);
     row.appendChild(lbl);
     row.appendChild(track);
     rowsEl.appendChild(row);
-
+ 
     cursor += barMo;
   });
 }
-
+ 
 // ── フェーズスライダー ──
 function buildPhaseSliders() {
   const wrap = document.getElementById('phase-sliders');
@@ -615,11 +615,11 @@ function buildPhaseSliders() {
     wrap.appendChild(row);
   });
 }
-
+ 
 function getPhaseRatios() {
   return Array.from(document.querySelectorAll('.ps-input')).map(s => parseFloat(s.value));
 }
-
+ 
 function onPhaseSlider() {
   const vals  = getPhaseRatios();
   const total = vals.reduce((a,b)=>a+b, 0);
@@ -629,7 +629,7 @@ function onPhaseSlider() {
   updatePhaseMonths();
   if (currentMonths > 0 && startYM) renderGantt();
 }
-
+ 
 function updatePhaseMonths() {
   const vals  = getPhaseRatios();
   const total = vals.reduce((a,b)=>a+b, 0);
