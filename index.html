@@ -253,7 +253,7 @@
     <div class="header-label">IPA準拠 / システム開発</div>
     <h1>標準工期<span>計算</span></h1>
     <div class="header-sub">独立行政法人情報処理推進機構（IPA）が定める標準工期算出式に基づく計算ツール</div>
-    <div class="formula-chip">T = 0.41 × PM^(1/3)</div>
+    <div class="formula-chip">T = 2.5 × PM^(1/3)</div>
   </header>
  
   <!-- 入力カード -->
@@ -369,7 +369,7 @@
   </div>
  
   <div class="footer-note">
-    算出式：標準工期（月）＝ 0.41 × 総工数^(1/3)　／　出典：IPA「ソフトウェア開発データ白書」<br>
+    算出式：標準工期（月）＝ 2.5 × 総工数^(1/3)　／　出典：IPA「ソフトウェア開発データ白書」<br>
     ※ 本ツールの結果はあくまで目安です。プロジェクトの特性・リスク・組織能力に応じて適宜見直してください。
   </div>
 </div>
@@ -454,7 +454,7 @@ function calculate() {
   }
   errEl.style.display = 'none';
  
-  const ipaExact = 0.41 * Math.pow(pm, 1/3);
+  const ipaExact = 2.5 * Math.pow(pm, 1/3);
   ipaRounded = Math.max(1, Math.round(ipaExact));
   currentMonths = ipaRounded;
   startYM = getStartYM();
